@@ -1,5 +1,6 @@
 import os
 import csv
+import asyncio
 from flask import Flask, request
 from telegram import Update
 from telegram.ext import ApplicationBuilder, MessageHandler, CommandHandler, filters, ContextTypes
@@ -42,23 +43,21 @@ telegram_app = ApplicationBuilder().token(TOKEN).build()
 telegram_app.add_handler(CommandHandler("start", start))
 telegram_app.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, check_number))
 
+# Initializing telegram app once at startup
+asyncio.run(telegram_app.initialize())
+asyncio.run(telegram_app.start())
+
 # Flask routes
 @app.route("/webhook", methods=["POST"])
-async def webhook():
+def webhook():
     # whenver tg send post req it will be received here, we convert the json data into Update object, then process it using process dispatcher
 
-    # ensure that tg app is initialized and running
-    if not telegram_app.running:
-        await telegram_app.initialize()
-        await telegram_app.start()
-
     data = request.get_json()
-
     # converting json to tg update object
     update = Update.de_json(data, telegram_app.bot)
 
     # process update using telegram dispatcher
-    await telegram_app.process_update(update)
+    asyncio.run(telegram_app.process_update(update))
     return "ok"
 
 @app.route("/", methods=["GET"])
