@@ -6,7 +6,6 @@ from telegram.ext import ApplicationBuilder, MessageHandler, CommandHandler, fil
 
 # Load token
 TOKEN = os.getenv("BOT_TOKEN")
-print(TOKEN)
 app = Flask(__name__)
 
 # Load csv data - fn will read the csv data and convert in dict
